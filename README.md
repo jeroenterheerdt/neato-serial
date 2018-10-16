@@ -1,17 +1,30 @@
-# neato-serial
+# Neato-serial
 Serial interface for Neato robot vacuum cleaners. Testing on XV Signature Pro and Raspberry Pi, should work on others. Uses [hub-ctrl.c](https://github.com/codazoda/hub-ctrl.c)
 
 ## Installation
 - install the requirements using provided `requirements.txt`: `pip install -r requirements.txt`
-- create `config.yaml` by copying the `config.yaml.example` provided and setting the correct values. See below for setting for `usb_switch_mode`.
+- create `config.yaml` by copying the `config.yaml.example` provided and setting the correct values. See below for settings.
 
 ## Setup
-To connect your Raspberry Pi to Neato two options are provided:
-- **direct**. Tested on Raspberry Pi 2 and 3. Does _not_ work on Raspberry Pi zero since usb port cannot be turned off - use **relay** instead. Connect your Pi and Neato directly using an USB cable:
+Configuration values:
+
+- serial_device: the device Neato is connected to. Multiple devices can be provided here, since after the USB connected has been temporarily switched off the device name might change. Example value: `/dev/ttyACM0,/dev/ttyACM1`
+- timeout_seconds: timeout in seconds to use for the serial connection. Example value: `0.1`
+- usb_switch_mode: specifies if you connected Neato directly through a USB cable or through a relay. Options: `direct` or `relay`:
+  - **direct**. Tested on Raspberry Pi 2 and 3. Does _not_ work on Raspberry Pi zero since usb port cannot be turned off - use **relay** instead. Connect your Pi and Neato directly using an USB cable:
 ![direct](raspberrypi-neato-direct.jpg?raw=true "Direct")
   This option does require elevated permissions (`sudo`) for the script since it needs to disable the usb port and (depending on config) reboot the Pi.
-- **relay**. Tested on Raspberry Pi 2, 3 and Zero. 
-
+  - **relay**. Not implemented yet.
+Example value: `direct`
+- reboot_after_usb_switch: specifies to reboot after usb has been switched off. Usefull if your Raspberry Pi does not reconnect after the USB has been disabled and enabled. Use with caution and only when running this script as a service. Example value: True
+- mqtt:
+  - host:	MQTT host
+  - username:	MQTT username
+  - password:	MQTT password
+  - port: MQTT port. Example value: `1883`
+  - command_topic: MQTT topic for receiving commands. Example value: `vacuum/command`
+  - state_topic: MQTT topic for publishing state. Example value: `vacuum/state`
+  - publish_wait_seconds: Delay in seconds before updating state again. Example value: `5`
 
 ## Usage
 Two modes are available (start either using `python3 xx.py`).
