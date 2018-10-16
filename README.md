@@ -9,12 +9,12 @@ Serial interface for Neato robot vacuum cleaners. Testing on XV Signature Pro an
 To connect your Raspberry Pi to Neato two options are provided:
 - **direct**. Tested on Raspberry Pi 2 and 3. Does _not_ work on Raspberry Pi zero - use relay instead. Connect your Pi and Neato directly using an USB cable:
 ![direct](raspberrypi-neato-direct.jpg?raw=true "Direct")
-
+  This option does require elevated permissions (`sudo`) for the script since it needs to disable the usb port and (depending on config) reboot the Pi.
 - **relay**. Tested on Raspberry Pi 2, 3 and Zero. 
 
 
 ## Usage
-Two modes are available (start either using `python3 xx.py`)
+Two modes are available (start either using `python3 xx.py`).
 - interactive console mode: `neatoserial.py`
 - mqtt mode: `neatoserialmqtt.py`, for integration in MQTT scenario. Built for integration with [Home Assistant via MQTT Vacuum component](https://www.home-assistant.io/components/vacuum.mqtt/) but should be usable elsewhere as well. Run this script as a service using systemctl to get the integration working (see provided `neatoserialmqtt.service` file). Sample configuration for Home Assistant:
 ```yaml
