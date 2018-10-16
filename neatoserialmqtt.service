@@ -1,0 +1,13 @@
+[Unit]
+Description = Neato Serial MQTT
+After = network.target
+
+[Service]
+Type=simple
+ExecStart =/usr/bin/python3 /home/pi/neato-serial/neatoserialmqtt.py
+WorkingDirectory=/home/pi/neato-serial
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy = multi-user.target
