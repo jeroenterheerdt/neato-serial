@@ -1,3 +1,11 @@
 serial:
-  serial_device: "/dev/ttyACM0"
+  serial_device: /dev/ttyACM0
   timeout_seconds: 0.1
+mqtt:
+  host:
+  username:
+  password:
+  port: 1883
+  command_topic: vacuum/command
+  state_topic: vacuum/state
+  publish_wait_seconds: 5

@@ -49,6 +49,71 @@ class NeatoSerial:
 			if out != '':
 				return out
 
+	def getBatteryLevel(self):
+		"""Returns battery level based."""
+		return int(self.getCharger()["FuelPercent"])
+
+	def getChargingActive(self):
+		"""Returns true if device is currently charging."""
+		return bool(int(self.getCharger()["ChargingActive"]))
+
+	def getExtPwrPresent(self):
+		"""Returns true if device is currently docked."""
+		return bool(int(self.getCharger()["ExtPwrPresent"]))
+
+	def getAccel(self):
+		"""Get accelerometer info."""
+		return self.parseOutput(self.write("GetAccel"))
+
+	def getAnalogSensors(self):
+		"""Get analog sensor info."""
+		return self.parseOutput(self.write("GetAnalogSensors"))
+
+	def getButtons(self):
+		"""Get button info."""
+		return self.parseOutput(self.write("GetButtons"))
+
+	def getCalInfo(self):
+		"""Get calibration info."""
+		return self.parseOutput(self.write("GetCalInfo"))
+
+	def getCharger(self):
+		"""Get charger info."""
+		return self.parseOutput(self.write("GetCharger"))
+
+	def getDigitalSensors(self):
+		"""Get digital sensor info."""
+		return self.parseOutput(self.write("GetDigitalSensors"))
+
+	def getLDSScan(self):
+		"""Get lidar scan."""
+		return self.parseOutput(self.write("GetLDSScan"))
+
+	def getMotors(self):
+		"""Get motor info."""
+		return self.parseOutput(self.write("GetMotors"))
+
+	def getVersion(self):
+		"""Get version info."""
+		return self.parseOutput(self.write("GetVersion"))
+
+	def getVacuumRPM(self):
+		"""Get vacuum RPM."""
+		return int(self.getMotors()["Vacuum_RPM"])
+
+	def getCleaning(self):
+		"""Returns true is device is currently cleaning."""
+		return self.getVacuumRPM() > 0
+
+	def parseOutput(self, output):
+		"""Parse the raw output of the serial port into a dictionary."""
+		lines = output.splitlines()
+		dict = {}
+		for l in lines:
+			lsplit = l.split(',')
+			if len(lsplit)>1:
+				dict[lsplit[0]]=lsplit[1]
+		return dict
 
 if __name__ == '__main__':
 	ns = NeatoSerial()

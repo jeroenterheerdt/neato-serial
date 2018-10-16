@@ -3,3 +3,4 @@ pyyaml
 pyserial
 os
 time
+json
