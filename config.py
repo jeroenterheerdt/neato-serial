@@ -1,4 +1,5 @@
+"""Reading config file."""
 import yaml
 
 with open("config.yaml", "r") as f:
-	settings = yaml.safe_load(f)
+    settings = yaml.safe_load(f)
