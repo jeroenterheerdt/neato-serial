@@ -41,3 +41,6 @@ vacuum:
     fan_speed_topic: "vacuum/state"
     fan_speed_template: "{{value_json.fan_speed}}"
   ```
+
+## Commands
+See [the Neato programmers manual](XV-ProgrammersManual-3_1.pdf) for available commands.
