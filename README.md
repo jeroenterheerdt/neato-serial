@@ -9,4 +9,4 @@ Serial interface for Neato robot vacuum cleaners. Testing on XV Signature Pro, s
 ## Usage
 Two modes are available:
 - interactive console mode: `neatoserial.py`
-- mqtt mode: `neatoserialmqtt.py`, built for integration with [https://www.home-assistant.io/components/vacuum.mqtt/](Home Assistant via MQTT Vacuum component).
+- mqtt mode: `neatoserialmqtt.py`, built for integration with (https://www.home-assistant.io/components/vacuum.mqtt/)[Home Assistant via MQTT Vacuum component].
