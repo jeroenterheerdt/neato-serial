@@ -39,7 +39,7 @@ class NeatoSerial:
 		self.ser.write(inp.encode('utf-8'))
 		if msg=="Clean":
 			#toggle usb
-			#sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; sudo ./hub-ctrl -h 0 -P 2 -p 1;
+			#os.system('sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; sudo ./hub-ctrl -h 0 -P 2 -p 1 ')
 			k = 0
 		out = ''
 		# let's wait one second before reading output (let's give device time to answer
