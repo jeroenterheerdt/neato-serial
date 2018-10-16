@@ -1,1 +1,2 @@
-Test
+SERIAL_DEVICE: "/dev/ttyACM0"
+TIMEOUT_SEC: 0.1
