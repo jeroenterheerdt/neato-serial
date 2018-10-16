@@ -1,11 +1,12 @@
 serial:
-  serial_device: /dev/ttyACM0
-  timeout_seconds: 0.1
+  serial_device: /dev/ttyACM0 	#the name of the device Neato is connected to
+  timeout_seconds: 0.1 			#timeout in seconds to use for the serial connection
+  usb_switch_mode: direct		#specifies if you connected Neato directly through a USB cable or through a relais (see readme on github)
 mqtt:
-  host:
-  username:
-  password:
-  port: 1883
-  command_topic: vacuum/command
-  state_topic: vacuum/state
-  publish_wait_seconds: 5
+  host:							#MQTT host
+  username:						#MQTT username
+  password:						#MQTT password
+  port: 1883					#MQTT port
+  command_topic: vacuum/command	#MQTT topic for receiving commands
+  state_topic: vacuum/state		#MQTT topic for publishing state
+  publish_wait_seconds: 5		#Delay in seconds before updating state again

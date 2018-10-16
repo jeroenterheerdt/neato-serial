@@ -39,8 +39,12 @@ class NeatoSerial:
 		self.ser.write(inp.encode('utf-8'))
 		if msg=="Clean":
 			#toggle usb
-			#os.system('sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; sudo ./hub-ctrl -h 0 -P 2 -p 1 ')
-			k = 0
+			if settings['serial']['usb_switch_mode'] == 'direct':
+				#disable and re-enable usb ports to trigger clean
+				os.system('sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; sudo ./hub-ctrl -h 0 -P 2 -p 1 ')
+			else:
+				# use relais to temporarily disconnect neato to trigger clean
+				to_do = True
 		out = ''
 		# let's wait one second before reading output (let's give device time to answer
 		time.sleep(1)
