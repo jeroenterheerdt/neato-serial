@@ -8,7 +8,7 @@ Serial interface for Neato robot vacuum cleaners. Testing on XV Signature Pro an
 ## Setup
 To connect your Raspberry Pi to Neato two options are provided:
 - direct. Tested on Raspberry Pi 2 and 3. Does _not_ work on Raspberry Pi zero - use relay instead. Connect your Pi and Neato directly using an USB cable:
-!(raspberrypi-neato-direct.jpg)
+!(https://raw.githubusercontent.com/jeroenterheerdt/neato-serial/master/raspberrypi-neato-direct.jpg)
 - relay. Tested on Raspberry Pi 2, 3 and Zero. 
 
 
