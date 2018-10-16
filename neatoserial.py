@@ -10,12 +10,16 @@ class NeatoSerial:
 
     def __init__(self):
         """Initialize serial connection to Neato."""
-        self.ser = serial.Serial(settings['serial']['serial_device'],
-                                 115200, serial.EIGHTBITS,
-                                 serial.PARITY_NONE,
-                                 serial.STOPBITS_ONE,
-                                 settings['serial']['timeout_seconds'])
-        self.open()
+        devices = settings['serial']['serial_device'].split(',')
+        for dev in devices:
+            try:
+                self.ser = serial.Serial(dev, 115200,
+                                         serial.EIGHTBITS, serial.PARITY_NONE,
+                                         serial.STOPBITS_ONE,
+                                         settings['serial']['timeout_seconds'])
+                self.open()
+            except:
+                print("Could not connect to device "+dev+". Trying next device.")
 
     def open(self):
         """Open serial port and flush the input."""
@@ -50,6 +54,8 @@ class NeatoSerial:
                 # disable and re-enable usb ports to trigger clean
                 os.system('sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; '
                           + 'sudo ./hub-ctrl -h 0 -P 2 -p 1 ')
+                if settings['serial']['reboot_after_usb_switch']:
+                    os.system('sudo reboot')
             else:
                 # use relais to temporarily disconnect neato to trigger clean
                 to_do = True
@@ -119,13 +125,16 @@ class NeatoSerial:
 
     def parseOutput(self, output):
         """Parse the raw output of the serial port into a dictionary."""
-        lines = output.splitlines()
-        dict = {}
-        for l in lines:
-            lsplit = l.split(',')
-            if len(lsplit) > 1:
-                dict[lsplit[0]] = lsplit[1]
-        return dict
+        if output is None:
+            return None
+        else:
+            lines = output.splitlines()
+            dict = {}
+            for l in lines:
+                lsplit = l.split(',')
+                if len(lsplit) > 1:
+                    dict[lsplit[0]] = lsplit[1]
+            return dict
 
 
 if __name__ == '__main__':

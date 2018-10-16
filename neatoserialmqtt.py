@@ -30,12 +30,15 @@ ns.open()
 print("Ready")
 client.loop_start()
 while True:
-    data = {}
-    data["battery_level"] = ns.getBatteryLevel()
-    data["docked"] = ns.getExtPwrPresent()
-    data["cleaning"] = ns.getCleaning()
-    data["charging"] = ns.getChargingActive()
-    data["fan_speed"] = ns.getVacuumRPM()
-    json_data = json.dumps(data)
-    client.publish(settings['mqtt']['state_topic'], json_data)
-    time.sleep(settings['mqtt']['publish_wait_seconds'])
+    try:
+        data = {}
+        data["battery_level"] = ns.getBatteryLevel()
+        data["docked"] = ns.getExtPwrPresent()
+        data["cleaning"] = ns.getCleaning()
+        data["charging"] = ns.getChargingActive()
+        data["fan_speed"] = ns.getVacuumRPM()
+        json_data = json.dumps(data)
+        client.publish(settings['mqtt']['state_topic'], json_data)
+        time.sleep(settings['mqtt']['publish_wait_seconds'])
+    except:
+        print("Error getting status.")
