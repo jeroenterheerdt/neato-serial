@@ -1,5 +1,5 @@
 # neato-serial
-Serial interface for Neato robot vacuum cleaners. Testing on XV Signature Pro and Raspberry Pi, should work on others.
+Serial interface for Neato robot vacuum cleaners. Testing on XV Signature Pro and Raspberry Pi, should work on others. Uses [hub-ctrl.c](https://github.com/codazoda/hub-ctrl.c)
 
 ## Installation
 - install the requirements using provided `requirements.txt`: `pip install -r requirements.txt`
