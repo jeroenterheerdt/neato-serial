@@ -18,6 +18,8 @@ class NeatoSerial:
                                          serial.STOPBITS_ONE,
                                          settings['serial']['timeout_seconds'])
                 self.open()
+                print("Connected to Neato at "+dev)
+                return
             except:
                 print("Could not connect to device "+dev+". Trying next device.")
 
@@ -46,6 +48,13 @@ class NeatoSerial:
 
     def write(self, msg):
         """Write message to serial and return output."""
+        # wake up neato by sending something random
+        self.ser.write("wake-up\n".encode('utf-8'))
+        time.sleep(1)
+        out = ''
+        while self.ser.inWaiting() > 0:
+            out += self.read_all(self.ser).decode('utf-8')
+        # now send the real message
         inp = msg+"\n"
         self.ser.write(inp.encode('utf-8'))
         if msg == "Clean":
