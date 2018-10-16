@@ -1,5 +1,5 @@
 serial:
-  serial_device: /dev/ttyACM0 #the name of the device Neato is connected to
+  serial_device: /dev/ttyACM0,/dev/ttyACM1 #the device Neato is connected to. Multiple devices can be provided here, since after the USB connected has been temporarily switched off the device name might change.
   timeout_seconds: 0.1 #timeout in seconds to use for the serial connection
   usb_switch_mode: direct #specifies if you connected Neato directly through a USB cable or through a relay (see readme on github): direct | relay
   reboot_after_usb_switch: True #specifies to reboot after usb has been switched off. Usefull if your Raspberry Pi does not reconnect after the USB has been disabled and enabled. Use with caution and only when running this script as a service.
