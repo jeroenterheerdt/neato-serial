@@ -3,13 +3,23 @@ from config import settings
 import serial
 import os
 import time
-
+import RPi.GPIO as GPIO
 
 class NeatoSerial:
     """Serial interface to Neato."""
 
     def __init__(self):
         """Initialize serial connection to Neato."""
+        if settings['serial']['usb_switch_mode'] == 'relay':
+            # use relay to temporarily disconnect neato to trigger clean
+            self.pin = int(settings['serial']['relay_gpio'])
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(self.pin, GPIO.OUT)
+            GPIO.output(self.pin, GPIO.HIGH)
+        self.connect()
+
+    def connect(self):
+        """Connect to serial port."""
         devices = settings['serial']['serial_device'].split(',')
         for dev in devices:
             try:
@@ -25,8 +35,11 @@ class NeatoSerial:
 
     def open(self):
         """Open serial port and flush the input."""
-        self.ser.isOpen()
-        self.ser.flushInput()
+        if self.ser is None:
+            return
+        else:
+            self.ser.isOpen()
+            self.ser.flushInput()
 
     def close(self):
         """Close serial port."""
@@ -65,14 +78,24 @@ class NeatoSerial:
             # toggle usb
             print("Message was 'Clean' so toggling USB")
             if settings['serial']['usb_switch_mode'] == 'direct':
+                print("Direct connection specified.")
                 # disable and re-enable usb ports to trigger clean
                 os.system('sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; '
                           + 'sudo ./hub-ctrl -h 0 -P 2 -p 1 ')
-                if settings['serial']['reboot_after_usb_switch']:
-                    os.system('sudo reboot')
-            else:
-                # use relais to temporarily disconnect neato to trigger clean
-                to_do = True
+            elif settings['serial']['usb_switch_mode'] == 'relay':
+                print("Relay connection specified")
+                # use relay to temporarily disconnect neato to trigger clean
+                GPIO.output(self.pin, GPIO.LOW)
+                time.sleep(1)
+                GPIO.output(self.pin, GPIO.HIGH)
+            if settings['serial']['reboot_after_usb_switch']:
+                os.system('sudo reboot')
+            #the device might have changed with the usb toggle, so let's close and reconnect
+            print("Reconnecting to Neato")
+            time.sleep(5)
+            self.close()
+            self.connect()
+            self.open()
         out = ''
         # let's wait one second before reading output
         time.sleep(1)
@@ -155,7 +178,6 @@ class NeatoSerial:
 
 if __name__ == '__main__':
     ns = NeatoSerial()
-    ns.open()
     print("Enter commands. Enter 'exit' to quit")
     while 1:
         inp = input("? ")

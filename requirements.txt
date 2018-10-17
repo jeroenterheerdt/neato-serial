@@ -1,3 +1,4 @@
 paho-mqtt
 pyyaml
 pyserial
+RPi.GPIO

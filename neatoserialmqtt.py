@@ -25,7 +25,6 @@ client.connect(settings['mqtt']['host'], settings['mqtt']['port'])
 client.subscribe(settings['mqtt']['command_topic'], qos=1)
 print("Setting up serial")
 ns = NeatoSerial()
-ns.open()
 
 print("Ready")
 client.loop_start()
