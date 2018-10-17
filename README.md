@@ -20,7 +20,7 @@ Configuration values:
 ![direct](raspberrypi-neato-direct.jpg?raw=true "Direct")
   
       This option does require elevated permissions (`sudo`) for the script since it needs to disable the usb port and (depending on config) reboot the Pi.
-    - **relay**. Not implemented yet.
+    - **relay**. Not implemented yet. Should be fairly easy to do - add a relay on the + wire of the USB. Switch the relay using GPIO.
     
     
     Example value: `direct`
