@@ -20,7 +20,7 @@ Configuration values:
 ![direct](raspberrypi-neato-direct.jpg?raw=true "Direct")
   
       This option does require elevated permissions (`sudo`) for the script since it needs to disable the usb port and (depending on config) reboot the Pi.
-    - **relay**. Switches the USB connection using a relay. Be sure to also specify the GPIO the relay is connected to with `relay_gpio`. Connect a 5V relay to your Raspberry Pi. Cut your USB wire and re-connect all the cables except the red one. Wire the red cable through the relay (one side into `Common` and the other into `NO`).
+    - **relay**. Switches the USB connection using a relay. Tested to work on Raspberry Pi zero and others. This is the only method that works on Raspberry Pi zero. Be sure to also specify the GPIO the relay is connected to with `relay_gpio`. Connect a 5V relay to your Raspberry Pi. Cut your USB wire and re-connect all the cables except the red one. Wire the red cable through the relay (one side into `Common` and the other into `NO`).
         
     Example value: `direct`
   - *relay_gpio*: specifies the GPIO the relay is connected to when using `usb_switch_mode: relay`.
