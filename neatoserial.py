@@ -48,6 +48,8 @@ class NeatoSerial:
 
     def write(self, msg):
         """Write message to serial and return output."""
+        print("Message received for writing: "+msg)
+        print("Sending wake-up message" )
         # wake up neato by sending something random
         self.ser.write("wake-up\n".encode('utf-8'))
         time.sleep(1)
@@ -55,10 +57,13 @@ class NeatoSerial:
         while self.ser.inWaiting() > 0:
             out += self.read_all(self.ser).decode('utf-8')
         # now send the real message
+        print("Sending actual message")
         inp = msg+"\n"
         self.ser.write(inp.encode('utf-8'))
+        print("Message sent")
         if msg == "Clean":
             # toggle usb
+            print("Message was 'Clean' so toggling USB")
             if settings['serial']['usb_switch_mode'] == 'direct':
                 # disable and re-enable usb ports to trigger clean
                 os.system('sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; '
@@ -71,7 +76,9 @@ class NeatoSerial:
         out = ''
         # let's wait one second before reading output
         time.sleep(1)
+        print("Reading output")
         while self.ser.inWaiting() > 0:
+            print("Read all")
             out += self.read_all(self.ser).decode('utf-8')
             if out != '':
                 return out
@@ -156,4 +163,7 @@ if __name__ == '__main__':
             ns.close()
             exit()
         else:
-            print(">> "+ns.write(inp))
+            try:
+                print(">> "+ns.write(inp))
+            except:
+                print("No result returned.")
