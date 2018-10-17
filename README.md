@@ -20,10 +20,10 @@ Configuration values:
 ![direct](raspberrypi-neato-direct.jpg?raw=true "Direct")
   
       This option does require elevated permissions (`sudo`) for the script since it needs to disable the usb port and (depending on config) reboot the Pi.
-    - **relay**. Not implemented yet. Should be fairly easy to do - add a relay on the + wire of the USB. Switch the relay using GPIO.
-    
-    
+    - **relay**. Switches the USB connection using a relay. Be sure to also specify the GPIO the relay is connected to with `relay_gpio`. Connect a 5V relay to your Raspberry Pi. Cut your USB wire and re-connect all the cables except the red one. Wire the red cable through the relay (one side into `Common` and the other into `NO`).
+        
     Example value: `direct`
+  - *relay_gpio*: specifies the GPIO the relay is connected to when using `usb_switch_mode: relay`.
   - *reboot_after_usb_switch*: specifies to reboot after usb has been switched off. Usefull if your Raspberry Pi does not reconnect after the USB has been disabled and enabled. Use with caution and only when running this script as a service.
     Example value: True
 - mqtt:
