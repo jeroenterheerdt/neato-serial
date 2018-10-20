@@ -73,4 +73,7 @@ vacuum:
 ## Commands
 See [the Neato programmers manual](XV-ProgrammersManual-3_1.pdf) for available commands.
 It seems that some commands are not listed in the manual:
+
     - `Clean Stop` stops the vacuum.
+    - `Clean Room` also seems to be available. Have not got it to work though.
+    
