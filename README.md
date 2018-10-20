@@ -50,6 +50,7 @@ vacuum:
     name: "Neato"
     supported_features:
       - turn_on
+      - turn_off
       - send_command
       - battery
       - status
@@ -65,6 +66,7 @@ vacuum:
     docked_template: "{{value_json.docked}}"
     send_command_topic: "vacuum/command"
     payload_turn_on: "Clean"
+    payload_turn_off: "Clean Stop"
     payload_locate: "PlaySound 19"
     fan_speed_topic: "vacuum/state"
     fan_speed_template: "{{value_json.fan_speed}}"
