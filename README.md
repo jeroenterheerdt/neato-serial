@@ -1,6 +1,13 @@
 # Neato-serial
 Serial interface for Neato robot vacuum cleaners. Transforms your non-connected Neato into a connected one. Tested on XV Signature Pro and Raspberry Pi, should work on others. Uses [hub-ctrl.c](https://github.com/codazoda/hub-ctrl.c).
 
+## Hardware required
+- Raspberry Pi (2, 3 and Zero tested and confirmed working) or any other device that runs Python and has some sort of GPIO and USB connectivity.
+- A mini usb cable to connect your Raspberry Pi to Neato
+- A micro usb cable to power your Raspberry Pi
+- A 5V step-down voltage regulator. I used one from [Pololu](https://www.pololu.com/product/2858) but any should do. Make sure it can handle at least 16V as that is what Neato will be providing to power your Raspberry Pi from.
+- A 5V relay (optional). I used a [Grove Relay from Seeed](http://wiki.seeedstudio.com/Grove-Relay/) but any 5v relay should do. The package also allows for direct USB connection, without a relay.
+
 ## Installation
 - install the requirements using provided `requirements.txt`: `pip install -r requirements.txt`
 - create `config.yaml` by copying the `config.yaml.example` provided and setting the correct values. See below for settings.
