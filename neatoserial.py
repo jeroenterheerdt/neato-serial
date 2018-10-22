@@ -127,15 +127,15 @@ class NeatoSerial:
 
     def getBatteryLevel(self):
         """Return battery level."""
-        return int(self.getCharger()["FuelPercent"])
+        return int(self.getCharger().get("FuelPercent"))
 
     def getChargingActive(self):
         """Return true if device is currently charging."""
-        return bool(int(self.getCharger()["ChargingActive"]))
+        return bool(int(self.getCharger().get("ChargingActive")))
 
     def getExtPwrPresent(self):
         """Return true if device is currently docked."""
-        return bool(int(self.getCharger()["ExtPwrPresent"]))
+        return bool(int(self.getCharger().get("ExtPwrPresent")))
 
     def getAccel(self):
         """Get accelerometer info."""
@@ -175,7 +175,7 @@ class NeatoSerial:
 
     def getVacuumRPM(self):
         """Get vacuum RPM."""
-        return int(self.getMotors()["Vacuum_RPM"])
+        return int(self.getMotors().get("Vacuum_RPM"))
 
     def getCleaning(self):
         """Return true is device is currently cleaning."""
