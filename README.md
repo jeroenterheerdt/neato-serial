@@ -10,6 +10,7 @@ Serial interface for Neato robot vacuum cleaners. Transforms your non-connected 
 
 ## Installation
 - install the requirements using provided `requirements.txt`: `pip install -r requirements.txt`
+- install [python-systemd](https://github.com/systemd/python-systemd/) by running `sudo apt-get install python3-systemd`
 - create `config.yaml` by copying the `config.yaml.example` provided and setting the correct values. See below for settings.
 
 ## Setup
