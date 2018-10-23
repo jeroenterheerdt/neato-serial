@@ -4,20 +4,23 @@ import serial
 import os
 import time
 import RPi.GPIO as GPIO
-
+import logging
 
 class NeatoSerial:
     """Serial interface to Neato."""
 
     def __init__(self):
         """Initialize serial connection to Neato."""
+        logging.basicConfig(level="INFO")
+        self.log = logging.getLogger(__name__)
         if settings['serial']['usb_switch_mode'] == 'relay':
             # use relay to temporarily disconnect neato to trigger clean
             self.pin = int(settings['serial']['relay_gpio'])
             GPIO.setmode(GPIO.BCM)
+            GPIO.setwarnings(False)
             GPIO.setup(self.pin, GPIO.OUT)
             GPIO.output(self.pin, GPIO.HIGH)
-        self.connect()
+        self.isConnected = self.connect()
 
     def connect(self):
         """Connect to serial port."""
@@ -29,11 +32,16 @@ class NeatoSerial:
                                          serial.STOPBITS_ONE,
                                          settings['serial']['timeout_seconds'])
                 self.open()
-                print("Connected to Neato at "+dev)
-                return
+                self.log.debug("Connected to Neato at "+dev)
+                return True
             except:
-                print("Could not connect to device "+dev+". "
+                self.log.error("Could not connect to device "+dev+". "
                       + "Trying next device.")
+        return False
+
+    def getIsConnected(self):
+        """Return if connected."""
+        return self.isConnected
 
     def open(self):
         """Open serial port and flush the input."""
@@ -46,6 +54,7 @@ class NeatoSerial:
     def close(self):
         """Close serial port."""
         self.ser.close()
+        self.isConnected = False
 
     def read_all(self, port, chunk_size=200):
         """Read all characters on the serial port and return them."""
@@ -64,12 +73,12 @@ class NeatoSerial:
     def toggleusb(self):
         """Toggle USB connection to Neato."""
         if settings['serial']['usb_switch_mode'] == 'direct':
-            print("Direct connection specified.")
+            self.log.debug("Direct connection specified.")
             # disable and re-enable usb ports to trigger clean
             os.system('sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; '
                       + 'sudo ./hub-ctrl -h 0 -P 2 -p 1 ')
         elif settings['serial']['usb_switch_mode'] == 'relay':
-            print("Relay connection specified")
+            self.log.debug("Relay connection specified")
             # use relay to temporarily disconnect neato to trigger clean
             GPIO.output(self.pin, GPIO.LOW)
             time.sleep(1)
@@ -77,41 +86,46 @@ class NeatoSerial:
         if settings['serial']['reboot_after_usb_switch']:
             os.system('sudo reboot')
 
+    def reconnect(self):
+        """Close and reconnect connection to Neato."""
+        self.log.debug("Reconnecting to Neato")
+        time.sleep(5)
+        self.close()
+        self.isConnected = self.connect()
+        self.open()
+
     def write(self, msg):
         """Write message to serial and return output."""
-        print("Message received for writing: "+msg)
-        print("Sending wake-up message")
-        # wake up neato by sending something random
-        self.ser.write("wake-up\n".encode('utf-8'))
-        time.sleep(1)
-        out = ''
-        while self.ser.inWaiting() > 0:
-            out += self.read_all(self.ser).decode('utf-8')
-        # now send the real message
-        print("Sending actual message")
-        inp = msg+"\n"
-        self.ser.write(inp.encode('utf-8'))
-        print("Message sent")
-        if msg == "Clean":
-            # toggle usb
-            print("Message was 'Clean' so toggling USB")
-            self.toggleusb()
-            # the device might have changed with the usb toggle,
-            # so let's close and reconnect
-            print("Reconnecting to Neato")
-            time.sleep(5)
-            self.close()
-            self.connect()
-            self.open()
-        out = ''
-        # let's wait one second before reading output
-        time.sleep(1)
-        print("Reading output")
-        while self.ser.inWaiting() > 0:
-            print("Read all")
-            out += self.read_all(self.ser).decode('utf-8')
-            if out != '':
-                return out
+        self.log.debug("Message received for writing: "+msg)
+        if self.isConnected:
+            # wake up neato by sending something random
+            try:
+                self.ser.write("wake-up\n".encode('utf-8'))
+                time.sleep(1)
+                out = ''
+                while self.ser.inWaiting() > 0:
+                    out += self.read_all(self.ser).decode('utf-8')
+                # now send the real message
+                inp = msg+"\n"
+                self.ser.write(inp.encode('utf-8'))
+                if msg.startswith("Clean"):
+                    # toggle usb
+                    self.log.debug("Message started with 'Clean' so toggling USB")
+                    self.toggleusb()
+                    # the device might have changed with the usb toggle,
+                    # so let's close and reconnect
+                    self.reconnect()
+                out = ''
+                # let's wait one second before reading output
+                time.sleep(1)
+                while self.ser.inWaiting() > 0:
+                    out += self.read_all(self.ser).decode('utf-8')
+                    if out != '':
+                        return out
+            except OSError as ex:
+                self.log.error("Exception in 'write' method: "+str(ex))
+        else:
+            self.isConnected = self.connect()
 
     def getError(self):
         """Return error message if available."""
@@ -119,7 +133,10 @@ class NeatoSerial:
         if output is not None:
             outputsplit = output.split('\r\n')
             if len(outputsplit) == 3:
-                return outputsplit[1]
+                err = outputsplit[1]
+                if ' - ' in err:
+                    errsplit = err.split(' - ')
+                    return errsplit[0], errsplit[1]
             else:
                 return None
         else:
@@ -127,15 +144,27 @@ class NeatoSerial:
 
     def getBatteryLevel(self):
         """Return battery level."""
-        return int(self.getCharger().get("FuelPercent"))
+        charger = self.getCharger()
+        if charger:
+            return int(charger.get("FuelPercent",0))
+        else:
+            return 0
 
     def getChargingActive(self):
         """Return true if device is currently charging."""
-        return bool(int(self.getCharger().get("ChargingActive")))
+        charger = self.getCharger()
+        if charger:
+            return bool(int(charger.get("ChargingActive", False)))
+        else:
+            return False
 
     def getExtPwrPresent(self):
         """Return true if device is currently docked."""
-        return bool(int(self.getCharger().get("ExtPwrPresent")))
+        charger = self.getCharger()
+        if charger:
+            return bool(int(charger.get("ExtPwrPresent", False)))
+        else:
+            return False
 
     def getAccel(self):
         """Get accelerometer info."""
@@ -175,7 +204,11 @@ class NeatoSerial:
 
     def getVacuumRPM(self):
         """Get vacuum RPM."""
-        return int(self.getMotors().get("Vacuum_RPM"))
+        motors = self.getMotors()
+        if motors:
+            return int(motors.get("Vacuum_RPM", 0))
+        else:
+            return 0
 
     def getCleaning(self):
         """Return true is device is currently cleaning."""
