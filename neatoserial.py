@@ -6,6 +6,7 @@ import time
 import RPi.GPIO as GPIO
 import logging
 
+
 class NeatoSerial:
     """Serial interface to Neato."""
 
@@ -36,7 +37,7 @@ class NeatoSerial:
                 return True
             except:
                 self.log.error("Could not connect to device "+dev+". "
-                      + "Trying next device.")
+                               + "Trying next device.")
         return False
 
     def getIsConnected(self):
@@ -94,6 +95,23 @@ class NeatoSerial:
         self.isConnected = self.connect()
         self.open()
 
+    def handleCleanMessage(self, msg):
+        """Handle sending and extra activities for Clean messages."""
+        inp = msg+"\n"
+        self.ser.write(inp.encode('utf-8'))
+        # toggle usb
+        self.log.debug("Message started with 'Clean' so toggling USB")
+        self.toggleusb()
+        # the device might have changed with the usb toggle,
+        # so let's close and reconnect
+        self.reconnect()
+        # we might have to send the message twice to start the actual cleaning
+        if self.getIsConnected() and not self.getCleaning():
+            self.ser.write(inp.encode('utf-8'))
+            self.log.debug("Resent 'Clean' message so toggling USB")
+            self.toggleusb()
+            self.reconnect()
+
     def write(self, msg):
         """Write message to serial and return output."""
         self.log.debug("Message received for writing: "+msg)
@@ -106,21 +124,11 @@ class NeatoSerial:
                 while self.ser.inWaiting() > 0:
                     out += self.read_all(self.ser).decode('utf-8')
                 # now send the real message
-                inp = msg+"\n"
-                self.ser.write(inp.encode('utf-8'))
                 if msg.startswith("Clean"):
-                    # toggle usb
-                    self.log.debug("Message started with 'Clean' so toggling USB")
-                    self.toggleusb()
-                    # the device might have changed with the usb toggle,
-                    # so let's close and reconnect
-                    self.reconnect()
-                    # we might have to send the message twice to start the actual cleaning
-                    if self.getIsConnected() and not self.getCleaning():
-                        self.ser.write(inp.encode('utf-8'))
-                        self.log.debug("Resent 'Clean' message so toggling USB")
-                        self.toggleusb()
-                        self.reconnect()
+                    self.handleCleanMessage(msg)
+                else:
+                    inp = msg+"\n"
+                    self.ser.write(inp.encode('utf-8'))
                 out = ''
                 # let's wait one second before reading output
                 time.sleep(1)
@@ -143,6 +151,10 @@ class NeatoSerial:
                 err = outputsplit[1]
                 if ' - ' in err:
                     errsplit = err.split(' - ')
+                    # if err is 220 (unplug usb before cleaning) handle it
+                    if int(errsplit[0]) == 220:
+                        self.toggleusb()
+                        self.reconnect()
                     return errsplit[0], errsplit[1]
             else:
                 return None
@@ -153,7 +165,7 @@ class NeatoSerial:
         """Return battery level."""
         charger = self.getCharger()
         if charger:
-            return int(charger.get("FuelPercent",0))
+            return int(charger.get("FuelPercent", 0))
         else:
             return 0
 
