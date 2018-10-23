@@ -115,6 +115,12 @@ class NeatoSerial:
                     # the device might have changed with the usb toggle,
                     # so let's close and reconnect
                     self.reconnect()
+                    # we might have to send the message twice to start the actual cleaning
+                    if self.getIsConnected() and not self.getCleaning():
+                        self.ser.write(inp.encode('utf-8'))
+                        self.log.debug("Resent 'Clean' message so toggling USB")
+                        self.toggleusb()
+                        self.reconnect()
                 out = ''
                 # let's wait one second before reading output
                 time.sleep(1)
@@ -124,6 +130,7 @@ class NeatoSerial:
                         return out
             except OSError as ex:
                 self.log.error("Exception in 'write' method: "+str(ex))
+                self.reconnect()
         else:
             self.isConnected = self.connect()
 
