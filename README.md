@@ -1,5 +1,5 @@
 # Neato-serial
-Serial interface for Neato robot vacuum cleaners. Transforms your non-connected Neato into a connected one. Tested on XV Signature Pro and Raspberry Pi, should work on others. Uses [hub-ctrl.c](https://github.com/codazoda/hub-ctrl.c).
+Serial interface for Neato robot vacuum cleaners. Transforms your non-connected Neato into a connected one. Tested on XV Signature Pro and Raspberry Pi, should work on others. Uses [hub-ctrl.c](https://github.com/codazoda/hub-ctrl.c). [Demo video](https://1drv.ms/v/s!AgiTl-Kme52yxtd8ciTFaWSZh6yjjw)
 
 ## Hardware required
 - Raspberry Pi (2, 3 and Zero tested and confirmed working) or any other device that runs Python and has some sort of GPIO and USB connectivity.
