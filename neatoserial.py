@@ -97,8 +97,7 @@ class NeatoSerial:
 
     def handleCleanMessage(self, msg):
         """Handle sending and extra activities for Clean messages."""
-        inp = msg+"\n"
-        self.ser.write(inp.encode('utf-8'))
+        out = self.raw_write(msg)
         # toggle usb
         self.log.debug("Message started with 'Clean' so toggling USB")
         self.toggleusb()
@@ -107,35 +106,37 @@ class NeatoSerial:
         self.reconnect()
         # we might have to send the message twice to start the actual cleaning
         if self.getIsConnected() and not self.getCleaning():
-            self.ser.write(inp.encode('utf-8'))
+            out = self.raw_write(msg)
             self.log.debug("Resent 'Clean' message so toggling USB")
             self.toggleusb()
             self.reconnect()
+        return out
+
+    def raw_write(self,msg):
+        """Write message to serial and return output."""
+        out = ''
+        if self.isConnected:
+            inp = msg+"\n"
+            self.ser.write(inp.encode('utf-8'))
+            time.sleep(1)
+            while self.ser.inWaiting() > 0:
+                out += self.read_all(self.ser).decode('utf-8')
+        return out
 
     def write(self, msg):
-        """Write message to serial and return output."""
+        """Write message to serial and return output. Handles Clean message."""
         self.log.debug("Message received for writing: "+msg)
         if self.isConnected:
             # wake up neato by sending something random
             try:
-                self.ser.write("wake-up\n".encode('utf-8'))
-                time.sleep(1)
-                out = ''
-                while self.ser.inWaiting() > 0:
-                    out += self.read_all(self.ser).decode('utf-8')
+                out = self.raw_write("wake-up")
                 # now send the real message
                 if msg.startswith("Clean"):
-                    self.handleCleanMessage(msg)
+                    out = self.handleCleanMessage(msg)
                 else:
-                    inp = msg+"\n"
-                    self.ser.write(inp.encode('utf-8'))
-                out = ''
-                # let's wait one second before reading output
-                time.sleep(1)
-                while self.ser.inWaiting() > 0:
-                    out += self.read_all(self.ser).decode('utf-8')
-                    if out != '':
-                        return out
+                    out = self.raw_write(msg)
+                if out is not '':
+                    return out
             except OSError as ex:
                 self.log.error("Exception in 'write' method: "+str(ex))
                 self.reconnect()
@@ -155,6 +156,7 @@ class NeatoSerial:
                     if int(errsplit[0]) == 220:
                         self.toggleusb()
                         self.reconnect()
+                        self.raw_write("Clean")
                     return errsplit[0], errsplit[1]
             else:
                 return None
