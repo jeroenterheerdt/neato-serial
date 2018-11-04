@@ -13,13 +13,6 @@ class NeatoSerial:
     def __init__(self):
         """Initialize serial connection to Neato."""
         self.log = logging.getLogger(__name__)
-        if settings['serial']['usb_switch_mode'] == 'relay':
-            # use relay to temporarily disconnect neato to trigger clean
-            self.pin = int(settings['serial']['relay_gpio'])
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setwarnings(False)
-            GPIO.setup(self.pin, GPIO.OUT)
-            GPIO.output(self.pin, GPIO.HIGH)
         self.isConnected = self.connect()
 
     def connect(self):
@@ -77,27 +70,6 @@ class NeatoSerial:
                 break
         return read_buffer
 
-    def toggleusb(self):
-        """Toggle USB connection to Neato."""
-        print("Entering TOGGLEUSB()")
-        if settings['serial']['usb_switch_mode'] == 'direct':
-            self.log.debug("Direct connection specified.")
-            print("Direct connection specified.")
-            # disable and re-enable usb ports to trigger clean
-            os.system('sudo ./hub-ctrl -h 0 -P 2 -p 0 ; sleep 1; '
-                      + 'sudo ./hub-ctrl -h 0 -P 2 -p 1 ')
-        elif settings['serial']['usb_switch_mode'] == 'relay':
-            print("Relay connection specified.")
-            self.log.debug("Relay connection specified")
-            # use relay to temporarily disconnect neato to trigger clean
-            GPIO.output(self.pin, GPIO.LOW)
-            time.sleep(1)
-            GPIO.output(self.pin, GPIO.HIGH)
-            print("Relay toggled.")
-        if settings['serial']['reboot_after_usb_switch']:
-            os.system('sudo reboot')
-        print("Leaving TOGGLEUSB()")
-
     def reconnect(self):
         """Close and reconnect connection to Neato."""
         print("Entering RECONNECT()")
@@ -109,28 +81,6 @@ class NeatoSerial:
         self.isConnected = self.connect()
         self.open()
         print("Leaving RECONNECT(),  isConnected = "+str(self.isConnected))
-
-    def handleCleanMessage(self, msg):
-        """Handle sending and extra activities for Clean messages."""
-        print("Entering HANDLECLEANMESSAGE(), msg = "+str(msg))
-        out = self.raw_write(msg)
-        # toggle usb
-        self.log.debug("Message started with 'Clean' so toggling USB")
-        print("Message started with 'Clean' so toggling USB")
-        self.toggleusb()
-        # the device might have changed with the usb toggle,
-        # so let's close and reconnect
-        time.sleep(1)
-        self.reconnect()
-        time.sleep(10)
-        # we might have to send the message twice to start the actual cleaning
-        #if self.getIsConnected() and not self.getCleaning():
-        #    out = self.raw_write(msg)
-        #    self.log.debug("Resent 'Clean' message so toggling USB")
-        #    self.toggleusb()
-        #    self.reconnect()
-        print("Leaving HANDLECLEANMESSAGE(), out="+str(out)[:10])
-        return out
 
     def raw_write(self,msg):
         """Write message to serial and return output."""
@@ -155,10 +105,7 @@ class NeatoSerial:
                 print("Sending Wake-up msg.")
                 out = self.raw_write("wake-up")
                 # now send the real message
-                if msg.startswith("Clean"):
-                    out = self.handleCleanMessage(msg)
-                else:
-                    out = self.raw_write(msg)
+                out = self.raw_write(msg)
                 if out is not '':
                     print("Leaving WRITE(), out = "+str(out)[:10])
                     return out
@@ -181,16 +128,6 @@ class NeatoSerial:
                 err = outputsplit[1]
                 if ' - ' in err:
                     errsplit = err.split(' - ')
-                    # if err is 220 (unplug usb before cleaning) handle it
-                    self.log.debug("Errorcode is 220")
-                    print("Errorcode is 220")
-                    if int(errsplit[0]) == 220:
-                        print("Toggling USB")
-                        self.toggleusb()
-                        print("Reconnecting")
-                        self.reconnect()
-                        print("!!!Calling RAW_WRITE('CLEAN').")
-                        self.raw_write("Clean")
                     print("Leaving GETERROR(), errsplit = "+str(errsplit))
                     return errsplit[0], errsplit[1]
             else:
