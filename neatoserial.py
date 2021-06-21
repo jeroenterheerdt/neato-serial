@@ -256,6 +256,20 @@ class NeatoSerial:
         """Get motor info."""
         return self.parseOutput(self.write("GetMotors"))
 
+    def getSerialNumber(self):
+        serialNum = self.getVersion()
+        if serialNum:
+            return serialNum.get("Serial Number", "1234")
+        else:
+            return str(1234)
+
+    def getSoftwareVersion(self):
+        softwareVer = self.getVersion()
+        if softwareVer:
+            return softwareVer.get("MainBoard Software", "1234")
+        else:
+            return str(1234)
+
     def getVersion(self):
         """Get version info."""
         return self.parseOutput(self.write("GetVersion"))
