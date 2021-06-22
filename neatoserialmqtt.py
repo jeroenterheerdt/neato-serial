@@ -90,17 +90,18 @@ def on_message(client, userdata, msg):
     """Message received."""
     inp = msg.payload.decode('ascii')
     log.info("Message received: "+inp)
-    if (inp == "Clean") or (inp == "Clean Spot"):
-        on_message_data={}
-        on_message_data["battery_level"] = battery_level
-        on_message_data["fan_speed"] = fan_speed
-        on_message_data["state"] = "cleaning"
-        json_on_message_data = json.dumps(on_message_data)
-        #Use secondary client connection to set state to cleaning before Pi reboots (Can't publish with primary client whithin callback function)
-        cleaning_client.publish(settings['mqtt']['state_topic'], json_on_message_data)
-        feedback = ns.write(inp)
-        log.info("Feedback from device: "+feedback)
-    elif inp == "Clean Stop":
+    if 'discovery_topic' in settings['mqtt']:
+        if (inp == "Clean") or (inp == "Clean Spot"):
+            on_message_data={}
+            on_message_data["battery_level"] = battery_level
+            on_message_data["fan_speed"] = fan_speed
+            on_message_data["state"] = "cleaning"
+            json_on_message_data = json.dumps(on_message_data)
+            #Use secondary client connection to set state to cleaning before Pi reboots (Can't publish with primary client whithin callback function)
+            cleaning_client.publish(settings['mqtt']['state_topic'], json_on_message_data)
+            feedback = ns.write(inp)
+            log.info("Feedback from device: "+feedback)
+        elif inp == "Clean Stop":
             on_message_data={}
             on_message_data["battery_level"] = battery_level
             on_message_data["fan_speed"] = fan_speed
@@ -110,9 +111,37 @@ def on_message(client, userdata, msg):
             cleaning_client.publish(settings['mqtt']['state_topic'], json_on_message_data)
             feedback = ns.write(inp)
             log.info("Feedback from device: "+feedback)
+        else:
+            feedback = ns.write(inp)
+            log.info("Feedback from device: "+feedback)
     else:
-        feedback = ns.write(inp)
-        log.info("Feedback from device: "+feedback)
+        if (inp == "Clean") or (inp == "Clean Spot"):
+            on_message_data={}
+            on_message_data["battery_level"] = battery_level
+            on_message_data["docked"] = is_docked
+            on_message_data["cleaning"] = True
+            on_message_data["charging"] = is_charging
+            on_message_data["fan_speed"] = fan_speed
+            json_on_message_data = json.dumps(on_message_data)
+            #Use secondary client connection to set state to cleaning before Pi reboots (Can't publish with primary client whithin callback function)
+            cleaning_client.publish(settings['mqtt']['state_topic'], json_on_message_data)
+            feedback = ns.write(inp)
+            log.info("Feedback from device: "+feedback)
+        elif inp == "Clean Stop":
+            on_message_data={}
+            on_message_data["battery_level"] = battery_level
+            on_message_data["docked"] = is_docked
+            on_message_data["cleaning"] = False
+            on_message_data["charging"] = is_charging
+            on_message_data["fan_speed"] = fan_speed
+            json_on_message_data = json.dumps(on_message_data)
+            #Use secondary client connection to set state to cleaning before Pi reboots (Can't publish with primary client whithin callback function)
+            cleaning_client.publish(settings['mqtt']['state_topic'], json_on_message_data)
+            feedback = ns.write(inp)
+            log.info("Feedback from device: "+feedback)
+        else:
+            feedback = ns.write(inp)
+            log.info("Feedback from device: "+feedback)
 
 def on_connect(client, userdata, flags, rc):
     """Broker responded to connection request"""
