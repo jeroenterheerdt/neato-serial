@@ -148,4 +148,7 @@ It seems that some commands are not listed in the manual:
 
     - `Clean Stop` stops the vacuum.
     - `Clean Spot` tells the vacuum to do a spot clean
-    
+
+
+## Other info
+https://github.com/Philip2809/neato-connected/tree/main
